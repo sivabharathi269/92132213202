@@ -1,1 +1,74 @@
+import React, { useState } from 'react';
+import axios from 'axios';
 
+const UrlShortener = () => {
+  const [longUrl, setLongUrl] = useState('');
+  const [shortUrl, setShortUrl] = useState('');
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
+
+  const handleShorten = async () => {
+    if (!longUrl.trim()) {
+      setError('Please enter a valid URL');
+      return;
+    }
+
+    try {
+      setLoading(true);
+      setError('');
+      const response = await axios.post('/api/shorten', { longUrl });
+      setShortUrl(response.data.shortUrl);
+    } catch (err) {
+      setError('Failed to shorten URL');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div style={styles.container}>
+      <h2>URL Shortener</h2>
+      <input
+        type="text"
+        placeholder="Enter long URL"
+        value={longUrl}
+        onChange={(e) => setLongUrl(e.target.value)}
+        style={styles.input}
+      />
+      <button onClick={handleShorten} style={styles.button}>
+        {loading ? 'Shortening...' : 'Shorten URL'}
+      </button>
+      {shortUrl && (
+        <p>
+          Short URL: <a href={shortUrl} target="_blank" rel="noopener noreferrer">{shortUrl}</a>
+        </p>
+      )}
+      {error && <p style={styles.error}>{error}</p>}
+    </div>
+  );
+};
+
+const styles = {
+  container: {
+    width: '400px',
+    margin: '50px auto',
+    textAlign: 'center',
+    fontFamily: 'Arial',
+  },
+  input: {
+    width: '100%',
+    padding: '10px',
+    margin: '10px 0',
+    fontSize: '16px',
+  },
+  button: {
+    padding: '10px 20px',
+    fontSize: '16px',
+    cursor: 'pointer',
+  },
+  error: {
+    color: 'red',
+  },
+};
+
+export default UrlShortener;
